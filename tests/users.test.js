@@ -163,5 +163,42 @@ expect(userInDatabase.language).toStrictEqual(updatedUser.language)
   });
 });
 
+//TEST DELETE USER
+describe("DELETE /api/users/:id", () => {
+  it("should edith new user to delete it", async () => {
+    const newUser = {
+      firstname: "Edward",
+      lastname: "Nigma",
+      email: `${crypto.randomUUID()}@wild.co`,
+      city: "Arkam-Asylum",
+      language: "English",
+  };
+    
+  const [result] = await database.query(
+    "INSERT INTO users(firstname, lastname, email, city, language) VALUES(?, ?, ?, ?, ?)", 
+      [
+        newUser.firstname,
+        newUser.lastname,
+        newUser.email,
+        newUser.city,
+        newUser.language,
+      ]
+    );
+  
+    const id = result.insertId;
+
+    const response = await request(app)
+    .delete(`/api/users/${id}`);
+
+    expect(response.status).toEqual(204);
+
+    const checkDelete = await request(app)
+    .get(`/api/users/${id}`);
+
+    expect(checkDelete.status).toEqual(404);
+  });
+
+});
+
 
 afterAll(() => database.end());
